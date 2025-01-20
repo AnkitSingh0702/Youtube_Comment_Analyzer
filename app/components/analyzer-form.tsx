@@ -22,18 +22,17 @@ function SubmitButton() {
 export function AnalyzerForm() {
   const initialState = {
     success: false,
-    results: {
-      agree: 0,
-      disagree: 0,
-      neutral: 0,
-      distribution: {} as Record<string, number>,
-      total: 0,
-    },
+    results: undefined,
     error: undefined,
   }
 
   const [state, action] = useActionState(analyzeComments, initialState)
   const [showResults, setShowResults] = useState(false)
+
+  const handleSubmit = async (formData: FormData) => {
+    await action(formData)
+    setShowResults(true)
+  }
 
   return (
     <div className="w-full max-w-2xl space-y-8">
@@ -43,13 +42,7 @@ export function AnalyzerForm() {
             <CardTitle className="text-center">Analyze YouTube Comments</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              action={async (formData) => {
-                action(formData)
-                setShowResults(true)
-              }}
-              className="space-y-4"
-            >
+            <form action={handleSubmit} className="space-y-4">
               <Input name="url" placeholder="https://www.youtube.com/watch?v=..." required className="text-lg p-6" />
               <SubmitButton />
             </form>
@@ -63,7 +56,9 @@ export function AnalyzerForm() {
         </Card>
       )}
 
-      {showResults && state.success && <AnalysisResults results={state.results} onBack={() => setShowResults(false)} />}
+      {showResults && state.success && state.results && (
+        <AnalysisResults results={state.results} onBack={() => setShowResults(false)} />
+      )}
     </div>
   )
 }
