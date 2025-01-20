@@ -140,14 +140,12 @@ async function analyzeSentiment(comment: string): Promise<string> {
   const prompt = `Analyze if this YouTube comment agrees, disagrees, or is neutral about the video content. Only respond with one word: "agree", "disagree", or "neutral". Here's the comment: "${comment}"`;
 
   try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await retryWithBackoff(() =>
-      genAI.getGenerativeModel({
-        model: "gemini-1.5-flash"
-      }).generateContent(prompt)
+      model.generateContent(prompt)
     );
 
-    const response = await result.response;
-    const text = response.text().trim().toLowerCase();
+    const text = result.candidates[0]?.content?.trim().toLowerCase();
 
     if (text.includes('agree')) return 'agree';
     if (text.includes('disagree')) return 'disagree';
